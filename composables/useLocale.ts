@@ -9,9 +9,10 @@ const messages = {
     login: 'Pieteikties', logout: 'Iziet', register: 'Reģistrācija', name: 'Vārds', phone: 'Tālrunis', password: 'Parole',
     noAccount: 'Nav konta?', hasAccount: 'Jau ir konts?',
     loginLoading: 'Notiek pieteikšanās...', createLoading: 'Konta izveide...',
+    registrationSuccessTitle: 'Reģistrācija veiksmīga!', registrationSuccessText: 'Jūsu konts ir izveidots. Tagad varat pievienot automašīnas un veikt pierakstu.', continueToAccount: 'Doties uz manu kontu',
     car: 'Jūsu automašīna', selectCar: 'Izvēlieties automašīnu', addCar: 'Pievienot automašīnu', addAnotherCar: 'Pievienot citu automašīnu',
     model: 'Modelis', date: 'Datums', freeTime: 'Brīvais laiks', retry: 'Mēģināt vēlreiz', checkDb: 'Notiek datubāzes pārbaude...', noSlots: 'Brīvu laiku nav.',
-    book: 'Rezervēt', booked: 'Pieraksts izveidots. To var apskatīt savā kontā.',
+    book: 'Rezervēt', booked: 'Pieraksts izveidots.', bookingSuccessTitle: 'Pieraksts veiksmīgi izveidots!', bookingSuccessText: 'Paldies! Jūsu pieraksts ir apstiprināts. Informāciju varat apskatīt savā kontā.', goToAccount: 'Doties uz manu kontu', bookAnother: 'Veikt vēl vienu pierakstu',
     dbUnavailable: 'Datubāze īslaicīgi nav pieejama. Brīvie laiki netiek rādīti. Nospiediet “Mēģināt vēlreiz”.',
     bookingFailed: 'Neizdevās izveidot pierakstu.', slotUnavailable: 'Šis laiks jau ir aizņemts. Izvēlieties citu.',
     loginFailed: 'Nepareizs e-pasts vai parole.', emailRegistered: 'Šis e-pasts jau ir reģistrēts.', registerFailed: 'Neizdevās izveidot kontu.',
@@ -29,9 +30,10 @@ const messages = {
     login: 'Войти', logout: 'Выйти', register: 'Регистрация', name: 'Имя', phone: 'Телефон', password: 'Пароль',
     noAccount: 'Нет аккаунта?', hasAccount: 'Уже есть аккаунт?',
     loginLoading: 'Вход...', createLoading: 'Создание...',
+    registrationSuccessTitle: 'Регистрация прошла успешно!', registrationSuccessText: 'Ваш аккаунт создан. Теперь вы можете добавить автомобили и записаться на мойку.', continueToAccount: 'Перейти в личный кабинет',
     car: 'Ваш автомобиль', selectCar: 'Выберите автомобиль', addCar: 'Добавить автомобиль', addAnotherCar: 'Добавить другой автомобиль',
     model: 'Модель', date: 'Дата', freeTime: 'Свободное время', retry: 'Повторить', checkDb: 'Проверка базы данных...', noSlots: 'Свободных часов нет.',
-    book: 'Забронировать', booked: 'Запись создана. Посмотреть её можно в личном кабинете.',
+    book: 'Забронировать', booked: 'Запись создана.', bookingSuccessTitle: 'Запись успешно создана!', bookingSuccessText: 'Спасибо! Ваша запись подтверждена. Подробности можно посмотреть в личном кабинете.', goToAccount: 'Перейти в личный кабинет', bookAnother: 'Записаться ещё раз',
     dbUnavailable: 'База данных временно недоступна. Свободные часы не показываются. Нажмите «Повторить».',
     bookingFailed: 'Не удалось создать запись.', slotUnavailable: 'Это время уже занято. Выберите другое.',
     loginFailed: 'Неверный email или пароль.', emailRegistered: 'Этот email уже зарегистрирован.', registerFailed: 'Не удалось создать аккаунт.',
@@ -49,9 +51,10 @@ const messages = {
     login: 'Log in', logout: 'Log out', register: 'Registration', name: 'Name', phone: 'Phone', password: 'Password',
     noAccount: 'No account?', hasAccount: 'Already have an account?',
     loginLoading: 'Signing in...', createLoading: 'Creating...',
+    registrationSuccessTitle: 'Registration successful!', registrationSuccessText: 'Your account has been created. You can now add cars and book an appointment.', continueToAccount: 'Go to my account',
     car: 'Your car', selectCar: 'Select a car', addCar: 'Add car', addAnotherCar: 'Add another car',
     model: 'Model', date: 'Date', freeTime: 'Available time', retry: 'Retry', checkDb: 'Checking database...', noSlots: 'No free times available.',
-    book: 'Book', booked: 'Booking created. You can view it in your account.',
+    book: 'Book', booked: 'Booking created.', bookingSuccessTitle: 'Booking successfully created!', bookingSuccessText: 'Thank you! Your appointment is confirmed. You can view the details in your account.', goToAccount: 'Go to my account', bookAnother: 'Book another appointment',
     dbUnavailable: 'The database is temporarily unavailable. Free times are not shown. Press “Retry”.',
     bookingFailed: 'Could not create the booking.', slotUnavailable: 'This time is already booked. Choose another.',
     loginFailed: 'Incorrect email or password.', emailRegistered: 'This email is already registered.', registerFailed: 'Could not create the account.',
@@ -67,22 +70,16 @@ type MessageKey = keyof typeof messages.en
 
 export function useLocale() {
   const locale = useState<Locale>('bt-locale', () => 'lv')
-
   if (import.meta.client) {
     onMounted(() => {
       const saved = localStorage.getItem('bt-locale') as Locale | null
       if (saved && ['lv', 'ru', 'en'].includes(saved)) locale.value = saved
     })
   }
-
   function setLocale(value: Locale) {
     locale.value = value
     if (import.meta.client) localStorage.setItem('bt-locale', value)
   }
-
-  function t(key: MessageKey) {
-    return messages[locale.value][key] ?? messages.en[key]
-  }
-
+  function t(key: MessageKey) { return messages[locale.value][key] ?? messages.en[key] }
   return { locale, setLocale, t, languages: { lv: 'LV', ru: 'RU', en: 'EN' } }
 }
