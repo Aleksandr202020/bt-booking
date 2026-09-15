@@ -45,35 +45,44 @@ export const vehicleCatalog = {
 
 export type VehicleCategory = 'passenger' | 'crossover' | 'commercial'
 
-const crossoverModels = new Set([
-  'Stelvio','Tonale',
-  'X1','X2','X3','X4','X5','X6','X7','XM','iX','iX1','iX3',
-  'Q2','Q3','Q4','Q5','Q7','Q8','E-Pace','F-Pace','GLA','GLB','GLC','GLE','GLK','GLS',
-  'G-Class','C-Crosser','C3 Aircross','C4 Aircross','C5 Aircross','C5 X','C4 Picasso','C3 Picasso','C8','Xsara Picasso',
-  'Formentor','Ateca','Arkana','Austral','Captur','Kadjar','Koleos','Eclipse Cross','Outlander','Pajero',
-  'Cherokee','Compass','Grand Cherokee','Renegade','Wrangler','Defender','Discovery','Discovery Sport',
-  'Freelander','Range Rover','Range Rover Evoque','Range Rover Sport','NX','RX','UX','CX-3','CX-5','CX-30','CX-60','CX-80',
-  'Juke','Qashqai','X-Trail','Kona','Santa Fe','Tucson','Sportage','Sorento','Niro','Stonic','EV6','Pilot',
-  '2008','3008','5008','Kuga','Puma','Edge','Explorer','RAV4','C-HR','Highlander','Land Cruiser',
-  '500X','500L','B-Max','C-Max','Orlando','Pacifica','Voyager','5','Countryman','Paceman','Meriva','Altea',
-  'T-Cross','T-Roc','Tayron','Tiguan','Touareg','Kamiq','Karoq','Kodiaq','Yeti','Arona','Tarraco',
-  'Forester','Outback','Solterra','XV','Vitara','S-Cross','Jimny','Ignis','Across','Niva','Niva Travel',
-  'Duster','Jogger','Durango','Journey','Model X','Model Y','Macan','Cayenne','C40','Smart #1','Smart #3'
-])
-
-const minivanModels = new Set([
-  'Touran','Sharan','S-Max','Galaxy','Alhambra','Espace','Scenic','Carnival','SpaceTourer','Lodgy'
-])
-
-const commercialModels = new Set([
-  'V-Class','Caddy','Crafter','Transporter','Amarok','Sprinter','Citan','Vito','Berlingo','Jumpy','Jumper','Nemo',
-  'Combo','Movano','Vivaro','Partner','Expert','Boxer','Rifter','Dokker','Kangoo','Trafic','Master','Primastar','Proace',
-  'Ducato','Doblo','Transit','Transit Connect','Tourneo','Staria','Hilux','Navara','L200','Gazelle','2705','3302','RAM','Gladiator'
-])
+const categoryOverrides: Record<string, VehicleCategory> = {
+  'Alfa Romeo:Stelvio':'crossover','Alfa Romeo:Tonale':'crossover',
+  'Chevrolet:Orlando':'crossover','Chrysler:Pacifica':'crossover','Chrysler:Voyager':'crossover',
+  'Citroen:C3 Aircross':'crossover','Citroen:C3 Picasso':'crossover','Citroen:C4 Aircross':'crossover','Citroen:C4 Picasso':'crossover','Citroen:C5 Aircross':'crossover','Citroen:C5 X':'crossover','Citroen:C8':'crossover','Citroen:C-Crosser':'crossover','Citroen:Xsara Picasso':'crossover',
+  'Dacia:Duster':'crossover','Dacia:Jogger':'crossover',
+  'Dodge:Durango':'crossover','Dodge:Journey':'crossover','Dodge:RAM':'commercial',
+  'Fiat:500X':'crossover','Fiat:500L':'crossover','Fiat:Doblo':'commercial','Fiat:Ducato':'commercial',
+  'Ford:B-Max':'crossover','Ford:C-Max':'crossover','Ford:EcoSport':'crossover','Ford:Edge':'crossover','Ford:Explorer':'crossover','Ford:Kuga':'crossover','Ford:Puma':'crossover','Ford:Tourneo':'commercial','Ford:Transit':'commercial','Ford:Transit Connect':'commercial',
+  'Honda:CR-V':'crossover','Honda:HR-V':'crossover','Honda:Pilot':'crossover',
+  'Hyundai:Kona':'crossover','Hyundai:Santa Fe':'crossover','Hyundai:Staria':'commercial','Hyundai:Tucson':'crossover',
+  'Jeep:Avenger':'crossover','Jeep:Cherokee':'crossover','Jeep:Compass':'crossover','Jeep:Gladiator':'commercial','Jeep:Grand Cherokee':'crossover','Jeep:Renegade':'crossover','Jeep:Wrangler':'crossover',
+  'Kia:Carnival':'crossover','Kia:EV6':'crossover','Kia:Niro':'crossover','Kia:Sorento':'crossover','Kia:Sportage':'crossover','Kia:Stonic':'crossover',
+  'Land Rover:Defender':'crossover','Land Rover:Discovery':'crossover','Land Rover:Discovery Sport':'crossover','Land Rover:Freelander':'crossover','Land Rover:Range Rover':'crossover','Land Rover:Range Rover Evoque':'crossover','Land Rover:Range Rover Sport':'crossover',
+  'Mazda:5':'crossover','Mazda:CX-3':'crossover','Mazda:CX-5':'crossover','Mazda:CX-30':'crossover','Mazda:CX-60':'crossover','Mazda:CX-80':'crossover',
+  'Mercedes:GLA':'crossover','Mercedes:GLB':'crossover','Mercedes:GLC':'crossover','Mercedes:GLE':'crossover','Mercedes:GLK':'crossover','Mercedes:GLS':'crossover','Mercedes:G-Class':'crossover','Mercedes:V-Class':'commercial','Mercedes:Citan':'commercial','Mercedes:Sprinter':'commercial','Mercedes:Vito':'commercial',
+  'Mini:Countryman':'crossover','Mini:Paceman':'crossover',
+  'Mitsubishi:Eclipse Cross':'crossover','Mitsubishi:L200':'commercial','Mitsubishi:Outlander':'crossover','Mitsubishi:Pajero':'crossover',
+  'Nissan:Juke':'crossover','Nissan:Navara':'commercial','Nissan:Primastar':'commercial','Nissan:Qashqai':'crossover','Nissan:X-Trail':'crossover',
+  'Opel:Antara':'crossover','Opel:Crossland':'crossover','Opel:Grandland':'crossover','Opel:Meriva':'crossover','Opel:Mokka':'crossover','Opel:Movano':'commercial','Opel:Vivaro':'commercial','Opel:Zafira':'crossover','Opel:Combo':'commercial',
+  'Peugeot:2008':'crossover','Peugeot:3008':'crossover','Peugeot:5008':'crossover','Peugeot:Partner':'commercial','Peugeot:Expert':'commercial','Peugeot:Boxer':'commercial','Peugeot:Rifter':'commercial',
+  'Porsche:Cayenne':'crossover','Porsche:Macan':'crossover',
+  'Renault:Arkana':'crossover','Renault:Austral':'crossover','Renault:Captur':'crossover','Renault:Kadjar':'crossover','Renault:Koleos':'crossover','Renault:Espace':'crossover','Renault:Scenic':'crossover','Renault:Kangoo':'commercial','Renault:Trafic':'commercial','Renault:Master':'commercial',
+  'Seat:Alhambra':'crossover','Seat:Altea':'crossover','Seat:Arona':'crossover','Seat:Ateca':'crossover','Seat:Tarraco':'crossover',
+  'Skoda:Kamiq':'crossover','Skoda:Karoq':'crossover','Skoda:Kodiaq':'crossover','Skoda:Yeti':'crossover',
+  'Smart:#1':'crossover','Smart:#3':'crossover',
+  'Subaru:Forester':'crossover','Subaru:Outback':'crossover','Subaru:Solterra':'crossover','Subaru:XV':'crossover',
+  'Suzuki:Across':'crossover','Suzuki:Ignis':'crossover','Suzuki:Jimny':'crossover','Suzuki:S-Cross':'crossover','Suzuki:Vitara':'crossover',
+  'Tesla:Model 3':'passenger','Tesla:Model X':'crossover','Tesla:Model Y':'crossover',
+  'Toyota:C-HR':'crossover','Toyota:Highlander':'crossover','Toyota:Hilux':'commercial','Toyota:Land Cruiser':'crossover','Toyota:Proace':'commercial','Toyota:RAV4':'crossover',
+  'Volkswagen:Amarok':'commercial','Volkswagen:Caddy':'commercial','Volkswagen:Crafter':'commercial','Volkswagen:Sharan':'crossover','Volkswagen:T-Cross':'crossover','Volkswagen:T-Roc':'crossover','Volkswagen:Tayron':'crossover','Volkswagen:Tiguan':'crossover','Volkswagen:Touareg':'crossover','Volkswagen:Touran':'crossover','Volkswagen:Transporter':'commercial',
+  'Volvo:C40':'crossover','Volvo:XC40':'crossover','Volvo:XC60':'crossover','Volvo:XC70':'crossover','Volvo:XC90':'crossover',
+  'VAZ:Niva':'crossover','VAZ:Niva Travel':'crossover',
+  'GAZ:2705':'commercial','GAZ:3302':'commercial','GAZ:Gazelle':'commercial'
+}
 
 export function categoryForVehicle(make: string, model: string): VehicleCategory {
-  if (commercialModels.has(model)) return 'commercial'
-  if (minivanModels.has(model) || crossoverModels.has(model)) return 'crossover'
+  const override = categoryOverrides[`${make}:${model}`]
+  if (override) return override
   return 'passenger'
 }
 
