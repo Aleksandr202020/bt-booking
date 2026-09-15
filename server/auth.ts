@@ -10,6 +10,11 @@ function secret() {
   return new TextEncoder().encode(value)
 }
 
+function isAdminEmail(email: string) {
+  const configured = useRuntimeConfig().adminEmail?.trim().toLowerCase()
+  return Boolean(configured && email.trim().toLowerCase() === configured)
+}
+
 export async function hashPassword(password: string) {
   return bcrypt.hash(password, 12)
 }
@@ -39,10 +44,21 @@ export async function getSession(event: any) {
     const { payload } = await jwtVerify(token, secret(), { algorithms: ['HS256'] })
     const userId = payload.sub
     if (!userId) return null
+
     const result = await dbQuery<{ id: string; name: string; email: string; phone: string; role: string }>(
       'SELECT id, name, email, phone, role FROM users WHERE id = $1', [userId]
     )
-    return result.rows[0] ?? null
+    const user = result.rows[0]
+    if (!user) return null
+
+    // ADMIN_EMAIL is the authoritative admin identity. This also fixes existing
+    // sessions where the JWT was created before the account was promoted to admin.
+    if (isAdminEmail(user.email) && user.role !== 'admin') {
+      await dbQuery('UPDATE users SET role = \'admin\' WHERE id = $1', [user.id])
+      user.role = 'admin'
+    }
+
+    return user
   } catch (error) {
     if (error instanceof Error && error.message === 'DATABASE_UNAVAILABLE') throw error
     return null
