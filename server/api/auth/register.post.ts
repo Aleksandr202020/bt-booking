@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { dbQuery } from '../../db'
+import { dbQuery, DatabaseQueryError } from '../../db'
 import { hashPassword, setSession } from '../../auth'
 
 const bodySchema = z.object({
@@ -21,7 +21,7 @@ export default defineEventHandler(async event => {
     await setSession(event, user.id, user.role)
     return { ok: true }
   } catch (error) {
-    if (error instanceof Error && error.message === 'DATABASE_UNAVAILABLE') throw error
-    throw createError({ statusCode: 409, statusMessage: 'EMAIL_ALREADY_REGISTERED' })
+    if (error instanceof DatabaseQueryError && error.code === '23505') throw createError({ statusCode: 409, statusMessage: 'EMAIL_ALREADY_REGISTERED' })
+    throw error
   }
 })
