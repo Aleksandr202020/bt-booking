@@ -3,7 +3,7 @@ export default defineNuxtConfig({
   devtools: { enabled: false },
   modules: ['@nuxtjs/tailwindcss'],
   runtimeConfig: {
-    databaseUrl: process.env.DATABASE_URL,
+    databaseUrl: process.env.DB_URL || process.env.DATABASE_URL,
     sessionSecret: process.env.SESSION_SECRET,
     adminEmail: process.env.ADMIN_EMAIL,
     public: {
