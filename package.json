@@ -1,0 +1,20 @@
+{
+  "name": "bt-booking",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "nuxt dev",
+    "build": "nuxt build",
+    "preview": "nuxt preview",
+    "typecheck": "nuxt typecheck"
+  },
+  "dependencies": {
+    "@nuxtjs/tailwindcss": "^6.14.0",
+    "bcryptjs": "^3.0.2",
+    "jose": "^6.1.0",
+    "nuxt": "^3.17.7",
+    "pg": "^8.16.3",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {}
+}
