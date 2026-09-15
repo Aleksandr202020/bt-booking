@@ -46,26 +46,29 @@ export const vehicleCatalog = {
 export type VehicleCategory = 'passenger' | 'crossover' | 'commercial'
 
 const crossoverModels = new Set([
+  'Stelvio','Tonale',
   'X1','X2','X3','X4','X5','X6','X7','XM','iX','iX1','iX3',
   'Q2','Q3','Q4','Q5','Q7','Q8','E-Pace','F-Pace','GLA','GLB','GLC','GLE','GLK','GLS',
-  'G-Class','C-Crosser','C3 Aircross','C4 Aircross','C5 Aircross','C5 X','C4 Picasso','C3 Picasso',
+  'G-Class','C-Crosser','C3 Aircross','C4 Aircross','C5 Aircross','C5 X','C4 Picasso','C3 Picasso','C8','Xsara Picasso',
   'Formentor','Ateca','Arkana','Austral','Captur','Kadjar','Koleos','Eclipse Cross','Outlander','Pajero',
   'Cherokee','Compass','Grand Cherokee','Renegade','Wrangler','Defender','Discovery','Discovery Sport',
   'Freelander','Range Rover','Range Rover Evoque','Range Rover Sport','NX','RX','UX','CX-3','CX-5','CX-30','CX-60','CX-80',
-  'Juke','Qashqai','X-Trail','Kona','Santa Fe','Tucson','Sportage','Sorento','Niro','Stonic','EV6',
-  '2008','3008','5008','Rifter','Kuga','Puma','Edge','Explorer','RAV4','C-HR','Highlander','Land Cruiser',
+  'Juke','Qashqai','X-Trail','Kona','Santa Fe','Tucson','Sportage','Sorento','Niro','Stonic','EV6','Pilot',
+  '2008','3008','5008','Kuga','Puma','Edge','Explorer','RAV4','C-HR','Highlander','Land Cruiser',
+  '500X','500L','B-Max','C-Max','Orlando','Pacifica','Voyager','5','Countryman','Paceman','Meriva','Altea',
   'T-Cross','T-Roc','Tayron','Tiguan','Touareg','Kamiq','Karoq','Kodiaq','Yeti','Arona','Tarraco',
-  'Forester','Outback','Solterra','XV','Vitara','S-Cross','Jimny','Duster','Jogger','Model X','Model Y','Model 3','Macan','Cayenne'
+  'Forester','Outback','Solterra','XV','Vitara','S-Cross','Jimny','Ignis','Across','Niva','Niva Travel',
+  'Duster','Jogger','Durango','Journey','Model X','Model Y','Macan','Cayenne','C40','Smart #1','Smart #3'
 ])
 
 const minivanModels = new Set([
-  'V-Class','Touran','Sharan','S-Max','Galaxy','Alhambra','Espace','Scenic','Carnival','SpaceTourer','Lodgy','Lodgy'
+  'Touran','Sharan','S-Max','Galaxy','Alhambra','Espace','Scenic','Carnival','SpaceTourer','Lodgy'
 ])
 
 const commercialModels = new Set([
-  'Caddy','Crafter','Transporter','Amarok','Sprinter','Citan','Vito','Berlingo','Jumpy','Jumper','Nemo',
-  'Combo','Movano','Vivaro','Partner','Expert','Boxer','Kangoo','Trafic','Master','Primastar','Proace',
-  'Ducato','Doblo','Transit','Transit Connect','Tourneo','Staria','Hilux','Navara','L200','Gazelle','2705','3302'
+  'V-Class','Caddy','Crafter','Transporter','Amarok','Sprinter','Citan','Vito','Berlingo','Jumpy','Jumper','Nemo',
+  'Combo','Movano','Vivaro','Partner','Expert','Boxer','Rifter','Dokker','Kangoo','Trafic','Master','Primastar','Proace',
+  'Ducato','Doblo','Transit','Transit Connect','Tourneo','Staria','Hilux','Navara','L200','Gazelle','2705','3302','RAM','Gladiator'
 ])
 
 export function categoryForVehicle(make: string, model: string): VehicleCategory {
