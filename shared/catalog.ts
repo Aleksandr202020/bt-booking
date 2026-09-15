@@ -47,23 +47,30 @@ export type VehicleCategory = 'passenger' | 'crossover' | 'commercial'
 
 const categoryOverrides: Record<string, VehicleCategory> = {
   'Alfa Romeo:Stelvio':'crossover','Alfa Romeo:Tonale':'crossover',
-  'Chevrolet:Orlando':'crossover','Chrysler:Pacifica':'crossover','Chrysler:Voyager':'crossover',
-  'Citroen:C3 Aircross':'crossover','Citroen:C3 Picasso':'crossover','Citroen:C4 Aircross':'crossover','Citroen:C4 Picasso':'crossover','Citroen:C5 Aircross':'crossover','Citroen:C5 X':'crossover','Citroen:C8':'crossover','Citroen:C-Crosser':'crossover','Citroen:Xsara Picasso':'crossover',
-  'Dacia:Duster':'crossover','Dacia:Jogger':'crossover',
-  'Dodge:Durango':'crossover','Dodge:Journey':'crossover','Dodge:RAM':'commercial',
+  'Audi:Q2':'crossover','Audi:Q3':'crossover','Audi:Q4':'crossover','Audi:Q5':'crossover','Audi:Q7':'crossover','Audi:Q8':'crossover',
+  'BMW:X1':'crossover','BMW:X2':'crossover','BMW:X3':'crossover','BMW:X4':'crossover','BMW:X5':'crossover','BMW:X6':'crossover','BMW:X7':'crossover','BMW:XM':'crossover','BMW:iX':'crossover','BMW:iX1':'crossover','BMW:iX3':'crossover',
+  'Chevrolet:Captiva':'crossover','Chevrolet:Orlando':'crossover','Chevrolet:Trax':'crossover',
+  'Chrysler:Pacifica':'crossover','Chrysler:Voyager':'crossover',
+  'Citroen:C3 Aircross':'crossover','Citroen:C3 Picasso':'crossover','Citroen:C4 Aircross':'crossover','Citroen:C4 Picasso':'crossover','Citroen:C5 Aircross':'crossover','Citroen:C5 X':'crossover','Citroen:C8':'crossover','Citroen:C-Crosser':'crossover','Citroen:SpaceTourer':'crossover','Citroen:Xsara Picasso':'crossover',
+  'Citroen:Berlingo':'commercial','Citroen:Jumpy':'commercial','Citroen:Jumper':'commercial','Citroen:Nemo':'commercial',
+  'Cupra:Formentor':'crossover','Cupra:Ateca':'crossover',
+  'Dacia:Dokker':'commercial','Dacia:Duster':'crossover','Dacia:Jogger':'crossover','Dacia:Lodgy':'crossover',
+  'Dodge:Avenger':'crossover','Dodge:Durango':'crossover','Dodge:Journey':'crossover','Dodge:RAM':'commercial',
   'Fiat:500X':'crossover','Fiat:500L':'crossover','Fiat:Doblo':'commercial','Fiat:Ducato':'commercial',
-  'Ford:B-Max':'crossover','Ford:C-Max':'crossover','Ford:EcoSport':'crossover','Ford:Edge':'crossover','Ford:Explorer':'crossover','Ford:Kuga':'crossover','Ford:Puma':'crossover','Ford:Tourneo':'commercial','Ford:Transit':'commercial','Ford:Transit Connect':'commercial',
+  'Ford:B-Max':'crossover','Ford:C-Max':'crossover','Ford:EcoSport':'crossover','Ford:Edge':'crossover','Ford:Explorer':'crossover','Ford:Galaxy':'crossover','Ford:Kuga':'crossover','Ford:Puma':'crossover','Ford:S-Max':'crossover','Ford:Tourneo':'commercial','Ford:Transit':'commercial','Ford:Transit Connect':'commercial',
   'Honda:CR-V':'crossover','Honda:HR-V':'crossover','Honda:Pilot':'crossover',
   'Hyundai:Kona':'crossover','Hyundai:Santa Fe':'crossover','Hyundai:Staria':'commercial','Hyundai:Tucson':'crossover',
+  'Jaguar:E-Pace':'crossover','Jaguar:F-Pace':'crossover',
   'Jeep:Avenger':'crossover','Jeep:Cherokee':'crossover','Jeep:Compass':'crossover','Jeep:Gladiator':'commercial','Jeep:Grand Cherokee':'crossover','Jeep:Renegade':'crossover','Jeep:Wrangler':'crossover',
   'Kia:Carnival':'crossover','Kia:EV6':'crossover','Kia:Niro':'crossover','Kia:Sorento':'crossover','Kia:Sportage':'crossover','Kia:Stonic':'crossover',
   'Land Rover:Defender':'crossover','Land Rover:Discovery':'crossover','Land Rover:Discovery Sport':'crossover','Land Rover:Freelander':'crossover','Land Rover:Range Rover':'crossover','Land Rover:Range Rover Evoque':'crossover','Land Rover:Range Rover Sport':'crossover',
+  'Lexus:NX':'crossover','Lexus:RX':'crossover','Lexus:UX':'crossover',
   'Mazda:5':'crossover','Mazda:CX-3':'crossover','Mazda:CX-5':'crossover','Mazda:CX-30':'crossover','Mazda:CX-60':'crossover','Mazda:CX-80':'crossover',
-  'Mercedes:GLA':'crossover','Mercedes:GLB':'crossover','Mercedes:GLC':'crossover','Mercedes:GLE':'crossover','Mercedes:GLK':'crossover','Mercedes:GLS':'crossover','Mercedes:G-Class':'crossover','Mercedes:V-Class':'commercial','Mercedes:Citan':'commercial','Mercedes:Sprinter':'commercial','Mercedes:Vito':'commercial',
+  'Mercedes:G-Class':'crossover','Mercedes:GLA':'crossover','Mercedes:GLB':'crossover','Mercedes:GLC':'crossover','Mercedes:GLE':'crossover','Mercedes:GLK':'crossover','Mercedes:GLS':'crossover','Mercedes:V-Class':'commercial','Mercedes:Citan':'commercial','Mercedes:Sprinter':'commercial','Mercedes:Vito':'commercial',
   'Mini:Countryman':'crossover','Mini:Paceman':'crossover',
   'Mitsubishi:Eclipse Cross':'crossover','Mitsubishi:L200':'commercial','Mitsubishi:Outlander':'crossover','Mitsubishi:Pajero':'crossover',
   'Nissan:Juke':'crossover','Nissan:Navara':'commercial','Nissan:Primastar':'commercial','Nissan:Qashqai':'crossover','Nissan:X-Trail':'crossover',
-  'Opel:Antara':'crossover','Opel:Crossland':'crossover','Opel:Grandland':'crossover','Opel:Meriva':'crossover','Opel:Mokka':'crossover','Opel:Movano':'commercial','Opel:Vivaro':'commercial','Opel:Zafira':'crossover','Opel:Combo':'commercial',
+  'Opel:Antara':'crossover','Opel:Crossland':'crossover','Opel:Grandland':'crossover','Opel:Meriva':'crossover','Opel:Mokka':'crossover','Opel:Zafira':'crossover','Opel:Combo':'commercial','Opel:Movano':'commercial','Opel:Vivaro':'commercial',
   'Peugeot:2008':'crossover','Peugeot:3008':'crossover','Peugeot:5008':'crossover','Peugeot:Partner':'commercial','Peugeot:Expert':'commercial','Peugeot:Boxer':'commercial','Peugeot:Rifter':'commercial',
   'Porsche:Cayenne':'crossover','Porsche:Macan':'crossover',
   'Renault:Arkana':'crossover','Renault:Austral':'crossover','Renault:Captur':'crossover','Renault:Kadjar':'crossover','Renault:Koleos':'crossover','Renault:Espace':'crossover','Renault:Scenic':'crossover','Renault:Kangoo':'commercial','Renault:Trafic':'commercial','Renault:Master':'commercial',
@@ -81,9 +88,8 @@ const categoryOverrides: Record<string, VehicleCategory> = {
 }
 
 export function categoryForVehicle(make: string, model: string): VehicleCategory {
-  const override = categoryOverrides[`${make}:${model}`]
-  if (override) return override
-  return 'passenger'
+  const override = categoryOverrides[`${make.trim()}:${model.trim()}`]
+  return override ?? 'passenger'
 }
 
 export function priceCentsForCategory(category: VehicleCategory) {
