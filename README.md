@@ -49,6 +49,10 @@ The admin user must first register normally.
 
 The application never interprets a database outage as an empty result. Availability queries fail with `DATABASE_UNAVAILABLE`, booking creation cannot succeed without the database, and the UI does not fall back to locally generated slots when the database cannot be queried.
 
+## Deployment trigger
+
+This marker intentionally triggers a new deployment from the current `main` branch.
+
 ## Next planned phase
 
 - Admin calendar with blocked individual slots and full days
