@@ -9,7 +9,7 @@ export default defineEventHandler(async event => {
   if (isHoliday(date)) return { date, slots: [], holiday: true }
 
   const allSlots = generateSlots(date)
-  const result = await dbQuery<{ booking_time: string }>(
+  const result = await dbQuery<{ booking_time: string | null }>(
     `SELECT to_char(booking_time, 'HH24:MI') AS booking_time
      FROM bookings
      WHERE booking_date = $1
@@ -20,6 +20,10 @@ export default defineEventHandler(async event => {
      WHERE booking_date = $1`,
     [date]
   )
-  const blocked = new Set(result.rows.map(row => row.booking_time))
-  return { date, slots: allSlots.filter(slot => !blocked.has(slot)), holiday: false }
+
+  const wholeDayBlocked = result.rows.some(row => row.booking_time === null)
+  if (wholeDayBlocked) return { date, slots: [], holiday: false, blocked: true }
+
+  const blocked = new Set(result.rows.map(row => row.booking_time).filter(Boolean))
+  return { date, slots: allSlots.filter(slot => !blocked.has(slot)), holiday: false, blocked: false }
 })
