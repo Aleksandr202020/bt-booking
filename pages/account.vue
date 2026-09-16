@@ -80,10 +80,15 @@ async function loadEditSlots() {
   editLoading.value = true
   error.value = ''
   try {
-    const r: any = await $fetch('/api/slots', { query: { date: editDate.value } })
+    const r: any = await $fetch('/api/slots', {
+      query: {
+        date: editDate.value,
+        ...(editingId.value ? { excludeBookingId: editingId.value } : {})
+      }
+    })
     editSlots.value = [...(r.slots ?? [])]
     const current = editTime.value
-    if (current && !editSlots.value.includes(current)) editSlots.value.push(current)
+    if (current && !editSlots.value.includes(current) && !isEditSlotPast(current)) editSlots.value.push(current)
     editSlots.value.sort()
     if (current && !editSlots.value.includes(current)) editTime.value = ''
   } catch (e: any) {
@@ -128,15 +133,11 @@ async function saveEdit() {
       body: { carId: editCar.value, date: editDate.value, time: editTime.value }
     })
 
-    // Use the record returned by PostgreSQL immediately. This avoids showing
-    // the old time if Nuxt's useFetch cache has not refreshed yet.
     const updated = response?.booking
     if (updated && bookings.value) {
       const updateList = (list: any[] | undefined) => {
         const index = list?.findIndex((item: any) => item.id === editingId.value) ?? -1
-        if (index >= 0 && list) {
-          list[index] = { ...list[index], ...updated }
-        }
+        if (index >= 0 && list) list[index] = { ...list[index], ...updated }
       }
       updateList(bookings.value.upcoming)
       updateList(bookings.value.history)
