@@ -1,7 +1,12 @@
 import { z } from 'zod'
 import { requireUser } from '../../auth'
 import { dbQuery, DatabaseQueryError } from '../../db'
-import { generateSlots, isWithinCustomerBookingWindow } from '../../../shared/slots'
+import {
+  generateSlots,
+  isWithinCustomerBookingWindow,
+  MAX_CUSTOMER_BOOKINGS_IN_WINDOW,
+  MAX_CUSTOMER_BOOKINGS_PER_CAR_IN_WINDOW
+} from '../../../shared/slots'
 import { priceCentsForCategory } from '../../../shared/catalog'
 
 const schema = z.object({
@@ -34,12 +39,16 @@ export default defineEventHandler(async event => {
 
   try {
     const result = await dbQuery(
-      `UPDATE bookings b
+      `WITH user_lock AS (
+         SELECT pg_advisory_xact_lock(hashtextextended($6, 0))
+       )
+       UPDATE bookings b
        SET car_id = $2,
            booking_date = $3,
            booking_time = $4,
            price_cents = $5,
            updated_at = now()
+       FROM user_lock
        WHERE b.id = $1
          AND b.user_id = $6
          AND b.status IN ('pending','confirmed')
@@ -55,8 +64,34 @@ export default defineEventHandler(async event => {
              AND other.status NOT IN ('cancelled_customer','cancelled_admin','no_show')
              AND other.id <> b.id
          )
-       RETURNING id,booking_date,booking_time,price_cents,status,car_id`,
-      [id, car.id, body.date, body.time, priceCents, user.id]
+         AND (
+           $7 = true OR (
+             (SELECT COUNT(*) FROM bookings x
+              WHERE x.user_id = $6
+                AND x.id <> b.id
+                AND x.booking_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '30 days'
+                AND x.status NOT IN ('cancelled_customer','cancelled_admin','no_show')) < $8
+             AND
+             (SELECT COUNT(*) FROM bookings x
+              WHERE x.user_id = $6
+                AND x.car_id = $2
+                AND x.id <> b.id
+                AND x.booking_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '30 days'
+                AND x.status NOT IN ('cancelled_customer','cancelled_admin','no_show')) < $9
+           )
+         )
+       RETURNING b.id,b.booking_date,b.booking_time,b.price_cents,b.status,b.car_id`,
+      [
+        id,
+        car.id,
+        body.date,
+        body.time,
+        priceCents,
+        user.id,
+        user.role === 'admin',
+        MAX_CUSTOMER_BOOKINGS_IN_WINDOW,
+        MAX_CUSTOMER_BOOKINGS_PER_CAR_IN_WINDOW
+      ]
     )
 
     if (!result.rows[0]) {
@@ -68,6 +103,23 @@ export default defineEventHandler(async event => {
         [id, user.id]
       )
       if (!existing.rows[0]) throw createError({ statusCode: 409, statusMessage: 'BOOKING_CANNOT_BE_EDITED' })
+
+      const counts = await dbQuery<{ total: number; car_total: number }>(
+        `SELECT
+           COUNT(*) FILTER (WHERE id <> $2 AND status NOT IN ('cancelled_customer','cancelled_admin','no_show'))::int AS total,
+           COUNT(*) FILTER (WHERE id <> $2 AND car_id = $3 AND status NOT IN ('cancelled_customer','cancelled_admin','no_show'))::int AS car_total
+         FROM bookings
+         WHERE user_id = $1
+           AND booking_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '30 days'`,
+        [user.id, id, car.id]
+      )
+      const count = counts.rows[0]
+      if (user.role !== 'admin' && count && count.total >= MAX_CUSTOMER_BOOKINGS_IN_WINDOW) {
+        throw createError({ statusCode: 409, statusMessage: 'BOOKING_LIMIT_REACHED' })
+      }
+      if (user.role !== 'admin' && count && count.car_total >= MAX_CUSTOMER_BOOKINGS_PER_CAR_IN_WINDOW) {
+        throw createError({ statusCode: 409, statusMessage: 'CAR_BOOKING_LIMIT_REACHED' })
+      }
       throw createError({ statusCode: 409, statusMessage: 'SLOT_UNAVAILABLE' })
     }
 
