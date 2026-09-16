@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const { locale, setLocale, languages, t } = useLocale()
-const { data: me } = await useFetch('/api/auth/me')
+const requestFetch = useRequestFetch()
+const { data: me } = await useAsyncData('current-user', () => requestFetch('/api/auth/me').catch(() => null))
 const isAdmin = computed(() => me.value?.user?.role === 'admin')
 </script>
 
