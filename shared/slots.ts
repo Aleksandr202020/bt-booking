@@ -3,6 +3,8 @@ export const OPEN_HOUR = 9
 export const CLOSE_HOUR = 21
 export const HOLIDAYS = ['06-23', '06-24']
 export const MAX_CUSTOMER_BOOKING_DAYS = 30
+export const MAX_CUSTOMER_BOOKINGS_IN_WINDOW = 10
+export const MAX_CUSTOMER_BOOKINGS_PER_CAR_IN_WINDOW = 5
 
 export function isHoliday(date: string) {
   const [, month, day] = date.split('-')
