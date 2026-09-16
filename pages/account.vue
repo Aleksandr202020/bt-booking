@@ -123,10 +123,25 @@ async function saveEdit() {
   editSaving.value = true
   error.value = ''
   try {
-    await $fetch(`/api/bookings/${editingId.value}`, {
+    const response: any = await $fetch(`/api/bookings/${editingId.value}`, {
       method: 'PUT',
       body: { carId: editCar.value, date: editDate.value, time: editTime.value }
     })
+
+    // Use the record returned by PostgreSQL immediately. This avoids showing
+    // the old time if Nuxt's useFetch cache has not refreshed yet.
+    const updated = response?.booking
+    if (updated && bookings.value) {
+      const updateList = (list: any[] | undefined) => {
+        const index = list?.findIndex((item: any) => item.id === editingId.value) ?? -1
+        if (index >= 0 && list) {
+          list[index] = { ...list[index], ...updated }
+        }
+      }
+      updateList(bookings.value.upcoming)
+      updateList(bookings.value.history)
+    }
+
     closeEdit()
     await refreshBookings()
   } catch (e: any) {
