@@ -1,9 +1,10 @@
 <script setup lang="ts">
+import { minBookingDate, maxBookingDate, isWithinBookingWindow } from '#shared/slots'
+
 const { t } = useLocale()
 const { data: me, error: meError } = await useFetch('/api/auth/me'); if(meError.value) await navigateTo('/login')
 const { data: cars, refresh: refreshCars } = await useFetch('/api/cars')
 const { data: bookings, refresh: refreshBookings } = await useFetch('/api/bookings')
-const { minBookingDate, maxBookingDate, isWithinBookingWindow } = await import('#shared/slots')
 const brands = Object.keys((await import('#shared/catalog')).vehicleCatalog)
 const models=ref<string[]>([]); const make=ref('BMW'); const model=ref(''); const error=ref('')
 const editingId=ref(''); const editDate=ref(''); const editTime=ref(''); const editCar=ref(''); const editSlots=ref<string[]>([]); const editLoading=ref(false); const editSaving=ref(false); const logoutLoading=ref(false)
