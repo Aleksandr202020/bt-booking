@@ -1,5 +1,7 @@
 <script setup lang="ts">
 const { locale, setLocale, languages, t } = useLocale()
+const { data: me } = await useFetch('/api/auth/me')
+const isAdmin = computed(() => me.value?.user?.role === 'admin')
 </script>
 
 <template>
@@ -11,7 +13,7 @@ const { locale, setLocale, languages, t } = useLocale()
           <nav class="flex gap-3 text-sm">
             <NuxtLink to="/booking">{{ t('onlineBooking') }}</NuxtLink>
             <NuxtLink to="/account">{{ t('myAccount') }}</NuxtLink>
-            <NuxtLink to="/admin">{{ t('admin') }}</NuxtLink>
+            <NuxtLink v-if="isAdmin" to="/admin">{{ t('admin') }}</NuxtLink>
           </nav>
           <label class="flex items-center gap-1 text-xs font-semibold" :aria-label="t('language')">
             <select :value="locale" class="rounded-lg border bg-white px-2 py-1" @change="setLocale(($event.target as HTMLSelectElement).value as 'lv'|'ru'|'en')">
