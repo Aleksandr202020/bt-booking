@@ -40,12 +40,12 @@ export default defineEventHandler(async event => {
   try {
     const result = await dbQuery(
       `WITH user_lock AS (
-         SELECT pg_advisory_xact_lock(hashtextextended($6, 0))
+         SELECT pg_advisory_xact_lock(hashtextextended($6::text, 0))
        )
        UPDATE bookings b
        SET car_id = $2,
-           booking_date = $3,
-           booking_time = $4,
+           booking_date = $3::date,
+           booking_time = $4::time,
            price_cents = $5,
            updated_at = now()
        FROM user_lock
@@ -55,50 +55,36 @@ export default defineEventHandler(async event => {
          AND (b.booking_date > CURRENT_DATE OR (b.booking_date = CURRENT_DATE AND b.booking_time > CURRENT_TIME))
          AND NOT EXISTS (
            SELECT 1 FROM blocked_slots
-           WHERE booking_date = $3 AND (booking_time = $4 OR booking_time IS NULL)
+           WHERE booking_date = $3::date AND (booking_time = $4::time OR booking_time IS NULL)
          )
          AND NOT EXISTS (
            SELECT 1 FROM bookings other
-           WHERE other.booking_date = $3
-             AND other.booking_time = $4
+           WHERE other.booking_date = $3::date
+             AND other.booking_time = $4::time
              AND other.status NOT IN ('cancelled_customer','cancelled_admin','no_show')
              AND other.id <> b.id
          )
          AND (
            $7 = true OR (
              (SELECT COUNT(*) FROM bookings x
-              WHERE x.user_id = $6
-                AND x.id <> b.id
+              WHERE x.user_id = $6 AND x.id <> b.id
                 AND x.booking_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '30 days'
                 AND x.status NOT IN ('cancelled_customer','cancelled_admin','no_show')) < $8
              AND
              (SELECT COUNT(*) FROM bookings x
-              WHERE x.user_id = $6
-                AND x.car_id = $2
-                AND x.id <> b.id
+              WHERE x.user_id = $6 AND x.car_id = $2 AND x.id <> b.id
                 AND x.booking_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '30 days'
                 AND x.status NOT IN ('cancelled_customer','cancelled_admin','no_show')) < $9
            )
          )
        RETURNING b.id,b.booking_date,b.booking_time,b.price_cents,b.status,b.car_id`,
-      [
-        id,
-        car.id,
-        body.date,
-        body.time,
-        priceCents,
-        user.id,
-        user.role === 'admin',
-        MAX_CUSTOMER_BOOKINGS_IN_WINDOW,
-        MAX_CUSTOMER_BOOKINGS_PER_CAR_IN_WINDOW
-      ]
+      [id, car.id, body.date, body.time, priceCents, user.id, user.role === 'admin', MAX_CUSTOMER_BOOKINGS_IN_WINDOW, MAX_CUSTOMER_BOOKINGS_PER_CAR_IN_WINDOW]
     )
 
     if (!result.rows[0]) {
       const existing = await dbQuery(
         `SELECT id FROM bookings
-         WHERE id = $1 AND user_id = $2
-           AND status IN ('pending','confirmed')
+         WHERE id = $1 AND user_id = $2 AND status IN ('pending','confirmed')
            AND (booking_date > CURRENT_DATE OR (booking_date = CURRENT_DATE AND booking_time > CURRENT_TIME))`,
         [id, user.id]
       )
@@ -108,8 +94,7 @@ export default defineEventHandler(async event => {
         `SELECT
            COUNT(*) FILTER (WHERE id <> $2 AND status NOT IN ('cancelled_customer','cancelled_admin','no_show'))::int AS total,
            COUNT(*) FILTER (WHERE id <> $2 AND car_id = $3 AND status NOT IN ('cancelled_customer','cancelled_admin','no_show'))::int AS car_total
-         FROM bookings
-         WHERE user_id = $1
+         FROM bookings WHERE user_id = $1
            AND booking_date BETWEEN CURRENT_DATE AND CURRENT_DATE + INTERVAL '30 days'`,
         [user.id, id, car.id]
       )
