@@ -133,6 +133,10 @@ async function saveEdit() {
       body: { carId: editCar.value, date: editDate.value, time: editTime.value }
     })
 
+    // Refresh first, then apply the exact record returned by the PUT.
+    // This prevents a stale GET response from overwriting the newly saved time.
+    await refreshBookings()
+
     const updated = response?.booking
     if (updated && bookings.value) {
       const updateList = (list: any[] | undefined) => {
@@ -144,7 +148,6 @@ async function saveEdit() {
     }
 
     closeEdit()
-    await refreshBookings()
   } catch (e: any) {
     error.value = e?.data?.statusMessage === 'SLOT_UNAVAILABLE'
       ? t('slotUnavailable')
