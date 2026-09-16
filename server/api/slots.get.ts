@@ -2,10 +2,13 @@ import { z } from 'zod'
 import { dbQuery } from '../db'
 import { generateSlots, isHoliday } from '../../shared/slots'
 
-const schema = z.object({ date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/) })
+const schema = z.object({
+  date: z.string().regex(/^\d{4}-\d{2}-\d{2}$/),
+  excludeBookingId: z.string().uuid().optional()
+})
 
 export default defineEventHandler(async event => {
-  const { date } = schema.parse(getQuery(event))
+  const { date, excludeBookingId } = schema.parse(getQuery(event))
   if (isHoliday(date)) return { date, slots: [], holiday: true }
 
   const allSlots = generateSlots(date)
@@ -14,11 +17,12 @@ export default defineEventHandler(async event => {
      FROM bookings
      WHERE booking_date = $1
        AND status NOT IN ('cancelled_customer','cancelled_admin','no_show')
+       AND ($2::uuid IS NULL OR id <> $2::uuid)
      UNION
      SELECT to_char(booking_time, 'HH24:MI') AS booking_time
      FROM blocked_slots
      WHERE booking_date = $1`,
-    [date]
+    [date, excludeBookingId ?? null]
   )
 
   const wholeDayBlocked = result.rows.some(row => row.booking_time === null)
