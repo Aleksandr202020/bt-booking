@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { requireUser } from '../../auth'
 import { dbQuery, DatabaseQueryError } from '../../db'
-import { generateSlots } from '../../../shared/slots'
+import { generateSlots, isWithinCustomerBookingWindow } from '../../../shared/slots'
 import { priceCentsForCategory } from '../../../shared/catalog'
 
 const schema = z.object({
@@ -13,6 +13,9 @@ const schema = z.object({
 export default defineEventHandler(async event => {
   const user = await requireUser(event)
   const body = schema.parse(await readBody(event))
+  if (user.role !== 'admin' && !isWithinCustomerBookingWindow(body.date)) {
+    throw createError({ statusCode: 400, statusMessage: 'BOOKING_DATE_OUT_OF_RANGE' })
+  }
   if (!generateSlots(body.date).includes(body.time)) throw createError({ statusCode: 400, statusMessage: 'INVALID_SLOT' })
 
   const carResult = await dbQuery<{ id: string; category: 'passenger'|'crossover'|'minivan'|'commercial'; make: string; model: string }>(
