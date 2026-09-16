@@ -3,6 +3,18 @@ import { SignJWT, jwtVerify } from 'jose'
 import { dbQuery } from './db'
 
 const COOKIE = 'bt_booking_session'
+let moderationSchemaReady: Promise<void> | null = null
+
+async function ensureModerationSchema() {
+  if (!moderationSchemaReady) {
+    moderationSchemaReady = dbQuery(`
+      ALTER TABLE users
+        ADD COLUMN IF NOT EXISTS banned_at TIMESTAMPTZ,
+        ADD COLUMN IF NOT EXISTS ban_reason TEXT
+    `).then(() => undefined)
+  }
+  return moderationSchemaReady
+}
 
 function secret() {
   const value = useRuntimeConfig().sessionSecret
@@ -45,26 +57,31 @@ export async function getSession(event: any) {
   const token = getCookie(event, COOKIE)
   if (!token) return null
   try {
+    await ensureModerationSchema()
     const { payload } = await jwtVerify(token, secret(), { algorithms: ['HS256'] })
     const userId = payload.sub
     if (!userId) return null
 
-    const result = await dbQuery<{ id: string; name: string; email: string; phone: string; role: string }>(
-      'SELECT id, name, email, phone, role FROM users WHERE id = $1', [userId]
+    const result = await dbQuery<{ id: string; name: string; email: string; phone: string; role: string; banned_at: string | null; ban_reason: string | null }>(
+      'SELECT id, name, email, phone, role, banned_at, ban_reason FROM users WHERE id = $1', [userId]
     )
     const user = result.rows[0]
     if (!user) return null
 
     const role = effectiveRole(user.email, user.role)
 
-    // Keep the database role synchronized with the configured admin identity.
     if (role === 'admin' && user.role !== 'admin') {
       await dbQuery("UPDATE users SET role = 'admin' WHERE id = $1", [user.id])
+    }
+
+    if (user.banned_at && role !== 'admin') {
+      throw createError({ statusCode: 403, statusMessage: 'USER_BANNED' })
     }
 
     return { ...user, role }
   } catch (error) {
     if (error instanceof Error && error.message === 'DATABASE_UNAVAILABLE') throw error
+    if (error && typeof error === 'object' && 'statusCode' in error) throw error
     return null
   }
 }
@@ -81,4 +98,8 @@ export async function requireAdmin(event: any) {
     throw createError({ statusCode: 403, statusMessage: 'ADMIN_REQUIRED' })
   }
   return user
+}
+
+export async function ensureUserModerationSchema() {
+  await ensureModerationSchema()
 }
