@@ -10,9 +10,13 @@ function secret() {
   return new TextEncoder().encode(value)
 }
 
-function isAdminEmail(email: string) {
+export function isAdminEmail(email: string) {
   const configured = useRuntimeConfig().adminEmail?.trim().toLowerCase()
   return Boolean(configured && email.trim().toLowerCase() === configured)
+}
+
+export function effectiveRole(email: string, role: string) {
+  return isAdminEmail(email) ? 'admin' : role
 }
 
 export async function hashPassword(password: string) {
@@ -51,14 +55,14 @@ export async function getSession(event: any) {
     const user = result.rows[0]
     if (!user) return null
 
-    // ADMIN_EMAIL is the authoritative admin identity. This also fixes existing
-    // sessions where the JWT was created before the account was promoted to admin.
-    if (isAdminEmail(user.email) && user.role !== 'admin') {
-      await dbQuery('UPDATE users SET role = \'admin\' WHERE id = $1', [user.id])
-      user.role = 'admin'
+    const role = effectiveRole(user.email, user.role)
+
+    // Keep the database role synchronized with the configured admin identity.
+    if (role === 'admin' && user.role !== 'admin') {
+      await dbQuery("UPDATE users SET role = 'admin' WHERE id = $1", [user.id])
     }
 
-    return user
+    return { ...user, role }
   } catch (error) {
     if (error instanceof Error && error.message === 'DATABASE_UNAVAILABLE') throw error
     return null
@@ -73,6 +77,8 @@ export async function requireUser(event: any) {
 
 export async function requireAdmin(event: any) {
   const user = await requireUser(event)
-  if (user.role !== 'admin') throw createError({ statusCode: 403, statusMessage: 'ADMIN_REQUIRED' })
+  if (effectiveRole(user.email, user.role) !== 'admin') {
+    throw createError({ statusCode: 403, statusMessage: 'ADMIN_REQUIRED' })
+  }
   return user
 }
