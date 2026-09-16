@@ -8,7 +8,7 @@ const blocks=ref<any[]>([])
 const users=ref<any[]>([])
 const error=ref('')
 const loading=ref(false)
-const activeTab=ref<'calendar'|'bookings'|'manual'|'blocks'>('calendar')
+const activeTab=ref<'calendar'|'bookings'|'manual'|'blocks'|'banned'>('calendar')
 const editing=ref<any|null>(null)
 const editDate=ref(''); const editTime=ref(''); const editCarId=ref('')
 const manualUserId=ref(''); const manualCarId=ref(''); const manualDate=ref(today); const manualTime=ref('09:00')
@@ -18,6 +18,7 @@ const slots=Array.from({length:12},(_,i)=>`${String(i+9).padStart(2,'0')}:00`)
 const selectedUser=computed(()=>users.value.find(u=>u.id===manualUserId.value))
 const selectedEditBooking=computed(()=>editing.value)
 const selectedEditCars=computed(()=>{const u=users.value.find(x=>x.id===editing.value?.user_id); return u?.cars??[]})
+const bannedUsers=computed(()=>users.value.filter(u=>u.banned_at))
 function userById(id:string){return users.value.find(u=>u.id===id)}
 function isBanned(id:string){return Boolean(userById(id)?.banned_at)}
 
@@ -69,7 +70,7 @@ await load()
 <div class="mx-auto max-w-7xl space-y-6">
   <header class="rounded-2xl border bg-white p-5 shadow-sm">
     <div class="flex flex-wrap items-center justify-between gap-4"><div><h1 class="text-3xl font-bold">{{t('adminPanel')}}</h1><p class="text-slate-600">BT Automazgātava · {{t('manageBookings')}}</p></div><button class="rounded-xl bg-slate-900 px-4 py-2 font-semibold text-white" @click="load">{{t('refresh')}}</button></div>
-    <div class="mt-5 flex flex-wrap gap-2"><button v-for="tab in ['calendar','bookings','manual','blocks']" :key="tab" type="button" class="rounded-xl px-4 py-2 font-semibold" :class="activeTab===tab?'bg-slate-900 text-white':'border bg-white'" @click="activeTab=tab as any; tab==='manual'&&loadUsers()">{{tab==='calendar'?'Calendar':tab==='bookings'?'All bookings':tab==='manual'?'Manual booking':'Blocked time'}}</button></div>
+    <div class="mt-5 flex flex-wrap gap-2"><button v-for="tab in ['calendar','bookings','manual','blocks','banned']" :key="tab" type="button" class="rounded-xl px-4 py-2 font-semibold" :class="activeTab===tab?'bg-slate-900 text-white':'border bg-white'" @click="activeTab=tab as any; (tab==='manual'||tab==='banned')&&loadUsers()">{{tab==='calendar'?'Calendar':tab==='bookings'?'All bookings':tab==='manual'?'Manual booking':tab==='blocks'?'Blocked time':'Banned clients'}}</button></div>
   </header>
   <p v-if="error" class="rounded-xl bg-red-50 p-3 text-red-700">{{error}}</p>
 
@@ -81,6 +82,31 @@ await load()
   <section v-if="activeTab==='bookings'" class="rounded-2xl border bg-white p-4">
     <div class="mb-4 flex flex-wrap gap-3"><input v-model="date" type="date" class="rounded-xl border p-3"><input v-model="to" type="date" class="rounded-xl border p-3"><button class="rounded-xl bg-slate-900 px-4 py-2 text-white" @click="load">{{t('refresh')}}</button></div>
     <div class="space-y-3"><article v-for="b in bookings" :key="b.id" class="rounded-2xl border p-4"><div class="flex flex-wrap justify-between gap-2"><b>{{b.booking_date}} · {{String(b.booking_time).slice(0,5)}}</b><b>{{(b.price_cents/100).toFixed(0)}} €</b></div><p class="mt-1 font-semibold">{{b.name}} · {{b.phone}}</p><p>{{b.make}} {{b.model}}</p><div class="mt-3 flex flex-wrap items-center gap-2"><select class="rounded-xl border p-2" :value="b.status" @change="changeStatus(b.id,($event.target as HTMLSelectElement).value)"><option>pending</option><option>confirmed</option><option>completed</option><option>cancelled_admin</option><option>no_show</option></select><button class="rounded-xl border px-3 py-2" @click="startEdit(b)">Edit</button><button v-if="b.status==='no_show'&&!isBanned(b.user_id)" class="rounded-xl border border-red-300 bg-red-50 px-3 py-2 font-semibold text-red-700" @click="banClient(b.user_id)">Ban for no-show</button><button v-else-if="!isBanned(b.user_id)" class="rounded-xl border border-red-300 px-3 py-2 text-red-700" @click="banClient(b.user_id)">Ban client</button><button v-else class="rounded-xl border border-emerald-300 px-3 py-2 text-emerald-700" @click="unbanClient(b.user_id)">Unban</button></div><p v-if="isBanned(b.user_id)" class="mt-2 text-sm text-red-700">Client is banned{{userById(b.user_id)?.ban_reason?` · ${userById(b.user_id).ban_reason}`:''}}</p><p v-else-if="b.status==='no_show'" class="mt-2 text-sm font-medium text-red-700">No-show recorded. You can ban this customer from future online bookings.</p></article><p v-if="!loading&&!bookings.length" class="py-6 text-center text-slate-500">{{t('noBookings')}}</p></div>
+  </section>
+
+  <section v-if="activeTab==='banned'" class="rounded-2xl border bg-white p-4">
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+      <div><h2 class="text-xl font-bold">Banned clients</h2><p class="text-sm text-slate-500">Customers who are currently blocked from online bookings.</p></div>
+      <button class="rounded-xl bg-slate-900 px-4 py-2 font-semibold text-white" @click="loadUsers">Refresh</button>
+    </div>
+    <div v-if="!bannedUsers.length" class="rounded-xl bg-slate-50 p-6 text-center text-slate-500">No banned clients.</div>
+    <div v-else class="space-y-3">
+      <article v-for="u in bannedUsers" :key="u.id" class="rounded-2xl border border-red-200 bg-red-50/40 p-4">
+        <div class="flex flex-wrap items-start justify-between gap-3">
+          <div>
+            <h3 class="font-bold">{{u.name}}</h3>
+            <p class="text-sm">{{u.phone}}</p>
+            <p class="text-sm text-slate-600">{{u.email}}</p>
+            <p class="mt-2 text-sm text-red-700"><b>Reason:</b> {{u.ban_reason||'No reason specified'}}</p>
+            <p v-if="u.banned_at" class="text-xs text-slate-500">Banned: {{new Date(u.banned_at).toLocaleString()}}</p>
+          </div>
+          <button class="rounded-xl border border-emerald-300 bg-white px-4 py-2 font-semibold text-emerald-700" @click="unbanClient(u.id)">Unban client</button>
+        </div>
+        <div v-if="u.cars?.length" class="mt-3 flex flex-wrap gap-2">
+          <span v-for="c in u.cars" :key="c.id" class="rounded-full border bg-white px-3 py-1 text-sm">{{c.make}} {{c.model}}</span>
+        </div>
+      </article>
+    </div>
   </section>
 
   <section v-if="activeTab==='manual'" class="max-w-xl rounded-2xl border bg-white p-5"><h2 class="text-xl font-bold">Manual booking</h2><p class="mt-1 text-sm text-slate-500">Create a booking for a phone/in-person customer.</p><div class="mt-5 space-y-3"><select v-model="manualUserId" class="w-full rounded-xl border p-3"><option value="">Select customer</option><option v-for="u in users" :key="u.id" :value="u.id">{{u.name}} · {{u.phone}}{{u.banned_at?' · BANNED':''}}</option></select><select v-model="manualCarId" class="w-full rounded-xl border p-3" :disabled="!selectedUser"><option value="">Select car</option><option v-for="c in selectedUser?.cars??[]" :key="c.id" :value="c.id">{{c.make}} {{c.model}}</option></select><input v-model="manualDate" type="date" class="w-full rounded-xl border p-3"><select v-model="manualTime" class="w-full rounded-xl border p-3"><option v-for="s in slots" :key="s">{{s}}</option></select><button class="w-full rounded-xl bg-slate-900 p-3 font-semibold text-white disabled:opacity-40" :disabled="!manualUserId||!manualCarId||!manualDate||!manualTime" @click="createManual">Create booking</button></div></section>
