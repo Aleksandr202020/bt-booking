@@ -40,11 +40,17 @@ export default defineEventHandler(async event => {
          SELECT pg_advisory_xact_lock(hashtextextended($1, 0))
        )
        INSERT INTO bookings (user_id,car_id,booking_date,booking_time,price_cents,status)
-       SELECT $1,$2,$3,$4,$5,'pending'
+       SELECT $1,$2,$3::date,$4::time,$5,'pending'
        FROM user_lock
        WHERE NOT EXISTS (
          SELECT 1 FROM blocked_slots
-         WHERE booking_date = $3 AND (booking_time = $4 OR booking_time IS NULL)
+         WHERE booking_date = $3::date AND (booking_time = $4::time OR booking_time IS NULL)
+       )
+       AND NOT EXISTS (
+         SELECT 1 FROM bookings other
+         WHERE other.booking_date = $3::date
+           AND other.booking_time = $4::time
+           AND other.status NOT IN ('cancelled_customer','cancelled_admin','no_show')
        )
        AND (
          $6 = true OR (
